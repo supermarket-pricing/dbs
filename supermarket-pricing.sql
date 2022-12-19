@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.21, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.31, for Win64 (x86_64)
 --
 -- Host: localhost    Database: supermarket_pricing
 -- ------------------------------------------------------
--- Server version	8.0.21
+-- Server version	8.0.31
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -28,10 +28,10 @@ CREATE TABLE `goods` (
   `code` varchar(45) CHARACTER SET utf32 COLLATE utf32_persian_ci NOT NULL,
   `price` decimal(10,0) NOT NULL,
   `active` bit(1) DEFAULT NULL,
-  `data` varchar(45) CHARACTER SET utf32 COLLATE utf32_persian_ci DEFAULT NULL,
-  `creator` binary(16) NOT NULL,
+  `data` json DEFAULT NULL,
+  `creatorId` binary(16) NOT NULL,
   `createDate` date NOT NULL,
-  `updater` varchar(45) CHARACTER SET utf32 COLLATE utf32_persian_ci DEFAULT NULL,
+  `updaterId` binary(16) DEFAULT NULL,
   `updDate` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf32 COLLATE=utf32_persian_ci;
@@ -45,6 +45,36 @@ LOCK TABLES `goods` WRITE;
 /*!40000 ALTER TABLE `goods` DISABLE KEYS */;
 /*!40000 ALTER TABLE `goods` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `pwp_price`
+--
+
+DROP TABLE IF EXISTS `pwp_price`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `pwp_price` (
+  `id` binary(16) NOT NULL DEFAULT (uuid_to_bin(uuid())),
+  `goodId` binary(16) NOT NULL,
+  `price` decimal(10,0) NOT NULL,
+  `active` bit(1) DEFAULT NULL,
+  `data` json DEFAULT NULL,
+  `creatorId` binary(16) NOT NULL,
+  `createDate` date NOT NULL,
+  `updaterId` binary(16) DEFAULT NULL,
+  `updDate` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf32 COLLATE=utf32_persian_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `pwp_price`
+--
+
+LOCK TABLES `pwp_price` WRITE;
+/*!40000 ALTER TABLE `pwp_price` DISABLE KEYS */;
+/*!40000 ALTER TABLE `pwp_price` ENABLE KEYS */;
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -55,4 +85,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-12-14  0:56:52
+-- Dump completed on 2022-12-19 12:13:15
