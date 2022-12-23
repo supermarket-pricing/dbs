@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.21, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.31, for Win64 (x86_64)
 --
 -- Host: localhost    Database: supermarket_pricing
 -- ------------------------------------------------------
--- Server version	8.0.21
+-- Server version	8.0.31
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -16,6 +16,37 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `currencies`
+--
+
+DROP TABLE IF EXISTS `currencies`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `currencies` (
+  `id` binary(16) NOT NULL DEFAULT (uuid_to_bin(uuid())),
+  `name` varchar(50) COLLATE utf32_persian_ci NOT NULL,
+  `code` varchar(5) COLLATE utf32_persian_ci NOT NULL,
+  `active` bit(1) DEFAULT NULL,
+  `data` json DEFAULT NULL,
+  `creatorId` binary(16) NOT NULL,
+  `createDate` date NOT NULL,
+  `updaterId` binary(16) DEFAULT NULL,
+  `updDate` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf32 COLLATE=utf32_persian_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `currencies`
+--
+
+LOCK TABLES `currencies` WRITE;
+/*!40000 ALTER TABLE `currencies` DISABLE KEYS */;
+/*!40000 ALTER TABLE `currencies` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `good_price`
 --
 
@@ -26,24 +57,24 @@ CREATE TABLE `good_price` (
   `id` binary(16) NOT NULL DEFAULT (uuid_to_bin(uuid())),
   `goodId` binary(16) NOT NULL,
   `price` decimal(10,0) unsigned NOT NULL,
+  `dateApplicable` date NOT NULL,
+  `pwpPrice` decimal(10,0) unsigned DEFAULT NULL,
+  `quantityToFree` tinyint unsigned DEFAULT NULL,
+  `quantityBeFree` tinyint unsigned DEFAULT NULL,
+  `quantityToGift` tinyint unsigned DEFAULT NULL,
+  `giftGoodId` binary(16) DEFAULT NULL,
   `active` bit(1) DEFAULT NULL,
   `data` json DEFAULT NULL,
   `creatorId` binary(16) NOT NULL,
   `createDate` date NOT NULL,
   `updaterId` binary(16) DEFAULT NULL,
   `updDate` datetime DEFAULT NULL,
-  `pwpPrice` decimal(10,0) unsigned DEFAULT NULL,
-  `quantityToFree` tinyint unsigned DEFAULT NULL,
-  `quantityBeFree` tinyint unsigned DEFAULT NULL,
-  `quantityToGift` tinyint unsigned DEFAULT NULL,
-  `giftGoodId` binary(16) DEFAULT NULL,
-  `dateApplicable` date NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `giftGoodIdInGoodPriceToIdInGoods` (`goodId`,`giftGoodId`),
   KEY `giftGoodIdInGoodPriceToIdInGoods_idx` (`giftGoodId`),
-  CONSTRAINT `giftGoodIdInGoodPriceToIdInGoods` FOREIGN KEY (`giftGoodId`) REFERENCES `goods` (`id`),
-  CONSTRAINT `goodIdInGoodPriceToIdInGoods` FOREIGN KEY (`goodId`) REFERENCES `goods` (`id`)
+  CONSTRAINT `giftGoodIdGoodPrice_IdGoods` FOREIGN KEY (`giftGoodId`) REFERENCES `goods` (`id`),
+  CONSTRAINT `goodIdGoodPrice_IdGoods` FOREIGN KEY (`goodId`) REFERENCES `goods` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf32 COLLATE=utf32_persian_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -109,12 +140,12 @@ CREATE TABLE `invoice_goods` (
   `updDate` date DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
-  KEY `invoiceIdInInvoiceGoodsToIdInInvoices` (`invoiceId`),
-  KEY `goodIdInInvoiceGoodsToIdInGoods` (`goodId`),
+  KEY `invoiceIdInvoiceGoods_IdInvoices` (`invoiceId`),
+  KEY `goodIdInvoiceGoods_IdGoods` (`goodId`),
   KEY `freeByGoodIdInInvoiceGoodsToIdInGoods_idx` (`freeByGoodId`),
-  CONSTRAINT `freeByGoodIdInInvoiceGoodsToIdInGoods` FOREIGN KEY (`freeByGoodId`) REFERENCES `goods` (`id`),
-  CONSTRAINT `goodIdInInvoiceGoodsToIdInGoods` FOREIGN KEY (`goodId`) REFERENCES `goods` (`id`),
-  CONSTRAINT `invoiceIdInInvoiceGoodsToIdInInvoices` FOREIGN KEY (`invoiceId`) REFERENCES `invoices` (`id`)
+  CONSTRAINT `freeByGoodIdInvoiceGoods_IdGoods` FOREIGN KEY (`freeByGoodId`) REFERENCES `goods` (`id`),
+  CONSTRAINT `goodIdInvoiceGoods_IdGoods` FOREIGN KEY (`goodId`) REFERENCES `goods` (`id`),
+  CONSTRAINT `invoiceIdInvoiceGoods_IdInvoices` FOREIGN KEY (`invoiceId`) REFERENCES `invoices` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf32 COLLATE=utf32_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -136,8 +167,9 @@ DROP TABLE IF EXISTS `invoices`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `invoices` (
   `id` binary(16) NOT NULL DEFAULT (uuid_to_bin(uuid())),
-  `no` varchar(15) COLLATE utf32_unicode_ci NOT NULL,
+  `no` varchar(15) CHARACTER SET utf32 COLLATE utf32_unicode_ci NOT NULL,
   `totalPrice` decimal(10,0) unsigned NOT NULL,
+  `currencyId` binary(16) NOT NULL,
   `active` bit(1) DEFAULT NULL,
   `data` json DEFAULT NULL,
   `creatorId` binary(16) NOT NULL,
@@ -145,7 +177,9 @@ CREATE TABLE `invoices` (
   `updaterId` binary(16) DEFAULT NULL,
   `updDate` date DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `id_UNIQUE` (`id`)
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `currencyIdInvoices_IdCurrencies` (`currencyId`),
+  CONSTRAINT `currencyIdInvoices_IdCurrencies` FOREIGN KEY (`currencyId`) REFERENCES `currencies` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf32 COLLATE=utf32_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -156,6 +190,41 @@ CREATE TABLE `invoices` (
 LOCK TABLES `invoices` WRITE;
 /*!40000 ALTER TABLE `invoices` DISABLE KEYS */;
 /*!40000 ALTER TABLE `invoices` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `notes_coins`
+--
+
+DROP TABLE IF EXISTS `notes_coins`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `notes_coins` (
+  `id` binary(16) NOT NULL DEFAULT (uuid_to_bin(uuid())),
+  `name` varchar(15) COLLATE utf32_persian_ci NOT NULL,
+  `code` varchar(5) COLLATE utf32_persian_ci NOT NULL,
+  `value` decimal(10,0) NOT NULL,
+  `currencyId` binary(16) NOT NULL,
+  `active` bit(1) DEFAULT NULL,
+  `data` json DEFAULT NULL,
+  `creatorId` binary(16) NOT NULL,
+  `createDate` date NOT NULL,
+  `updaterId` binary(16) DEFAULT NULL,
+  `updDate` date DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `currencyIdNotesCoins_IdCurrencies` (`currencyId`),
+  CONSTRAINT `currencyIdNotesCoins_IdCurrencies` FOREIGN KEY (`currencyId`) REFERENCES `currencies` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf32 COLLATE=utf32_persian_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `notes_coins`
+--
+
+LOCK TABLES `notes_coins` WRITE;
+/*!40000 ALTER TABLE `notes_coins` DISABLE KEYS */;
+/*!40000 ALTER TABLE `notes_coins` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -179,8 +248,8 @@ CREATE TABLE `stock_in_good` (
   `updDate` date DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
-  KEY `goodIdInStockInGoodToIdInGoods` (`goodId`),
-  CONSTRAINT `goodIdInStockInGoodToIdInGoods` FOREIGN KEY (`goodId`) REFERENCES `goods` (`id`)
+  KEY `goodIdStockInGood_IdGoods` (`goodId`),
+  CONSTRAINT `goodIdStockInGood_IdGoods` FOREIGN KEY (`goodId`) REFERENCES `goods` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf32 COLLATE=utf32_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -202,4 +271,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-12-21 21:14:28
+-- Dump completed on 2022-12-23 11:50:52
