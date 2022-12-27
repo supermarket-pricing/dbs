@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.31, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.21, for Win64 (x86_64)
 --
 -- Host: localhost    Database: supermarket_pricing
 -- ------------------------------------------------------
--- Server version	8.0.31
+-- Server version	8.0.21
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -24,8 +24,8 @@ DROP TABLE IF EXISTS `clients`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `clients` (
   `id` binary(16) NOT NULL DEFAULT (uuid_to_bin(uuid())),
-  `name` varchar(50) COLLATE utf32_persian_ci DEFAULT NULL,
-  `code` varchar(5) COLLATE utf32_persian_ci DEFAULT (left(uuid(),5)),
+  `name` varchar(50) CHARACTER SET utf32 COLLATE utf32_persian_ci DEFAULT NULL,
+  `code` varchar(5) CHARACTER SET utf32 COLLATE utf32_persian_ci DEFAULT (left(uuid(),5)),
   `userId` binary(16) DEFAULT NULL,
   `active` bit(1) DEFAULT NULL,
   `data` json DEFAULT NULL,
@@ -34,7 +34,8 @@ CREATE TABLE `clients` (
   `updaterId` binary(16) DEFAULT NULL,
   `updDate` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `id_UNIQUE` (`id`)
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  UNIQUE KEY `code_UNIQUE` (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf32 COLLATE=utf32_persian_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -56,8 +57,8 @@ DROP TABLE IF EXISTS `currencies`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `currencies` (
   `id` binary(16) NOT NULL DEFAULT (uuid_to_bin(uuid())),
-  `name` varchar(50) COLLATE utf32_persian_ci NOT NULL,
-  `code` varchar(5) COLLATE utf32_persian_ci NOT NULL DEFAULT (left(uuid(),5)),
+  `name` varchar(50) CHARACTER SET utf32 COLLATE utf32_persian_ci NOT NULL,
+  `code` varchar(5) CHARACTER SET utf32 COLLATE utf32_persian_ci NOT NULL,
   `active` bit(1) DEFAULT NULL,
   `data` json DEFAULT NULL,
   `creatorId` binary(16) NOT NULL,
@@ -65,7 +66,8 @@ CREATE TABLE `currencies` (
   `updaterId` binary(16) DEFAULT NULL,
   `updDate` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `id_UNIQUE` (`id`)
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  UNIQUE KEY `code_UNIQUE` (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf32 COLLATE=utf32_persian_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -137,7 +139,8 @@ CREATE TABLE `goods` (
   `updaterId` binary(16) DEFAULT NULL,
   `updDate` date DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `id_UNIQUE` (`id`)
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  UNIQUE KEY `code_UNIQUE` (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf32 COLLATE=utf32_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -199,7 +202,7 @@ DROP TABLE IF EXISTS `invoices`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `invoices` (
   `id` binary(16) NOT NULL DEFAULT (uuid_to_bin(uuid())),
-  `no` varchar(15) CHARACTER SET utf32 COLLATE utf32_unicode_ci NOT NULL,
+  `code` varchar(15) CHARACTER SET utf32 COLLATE utf32_unicode_ci NOT NULL DEFAULT (left(uuid(),15)),
   `clientId` binary(16) NOT NULL,
   `totalPrice` decimal(10,0) unsigned NOT NULL,
   `currencyId` binary(16) NOT NULL,
@@ -211,6 +214,7 @@ CREATE TABLE `invoices` (
   `updDate` date DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
+  UNIQUE KEY `code_UNIQUE` (`code`),
   KEY `currencyIdInvoices_IdCurrencies` (`currencyId`),
   KEY `clientIdInvoices_IdClients` (`clientId`),
   CONSTRAINT `clientIdInvoices_IdClients` FOREIGN KEY (`clientId`) REFERENCES `clients` (`id`),
@@ -236,8 +240,8 @@ DROP TABLE IF EXISTS `notes_coins`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `notes_coins` (
   `id` binary(16) NOT NULL DEFAULT (uuid_to_bin(uuid())),
-  `name` varchar(15) COLLATE utf32_persian_ci NOT NULL,
-  `code` varchar(5) COLLATE utf32_persian_ci NOT NULL DEFAULT (left(uuid(),5)),
+  `name` varchar(15) CHARACTER SET utf32 COLLATE utf32_persian_ci NOT NULL,
+  `code` varchar(5) CHARACTER SET utf32 COLLATE utf32_persian_ci NOT NULL,
   `value` decimal(10,0) NOT NULL,
   `currencyId` binary(16) NOT NULL,
   `active` bit(1) DEFAULT NULL,
@@ -248,6 +252,7 @@ CREATE TABLE `notes_coins` (
   `updDate` date DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
+  UNIQUE KEY `code_UNIQUE` (`code`),
   KEY `currencyIdNotesCoins_IdCurrencies` (`currencyId`),
   CONSTRAINT `currencyIdNotesCoins_IdCurrencies` FOREIGN KEY (`currencyId`) REFERENCES `currencies` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf32 COLLATE=utf32_persian_ci;
@@ -306,4 +311,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-12-23 17:54:20
+-- Dump completed on 2022-12-27 21:56:47
